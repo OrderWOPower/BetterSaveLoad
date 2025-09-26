@@ -19,9 +19,9 @@ namespace BetterSaveLoad
         private static readonly string QuickSaveNamePrefix = "save_quick_", BattleAutoSaveNamePrefix = "save_auto_battle_";
 
         private static int QuickSaveIndex = 0, BattleAutoSaveIndex = 0;
-        private static string ActiveSaveSlotName = null;
 
-        public static SaveGameFileInfo SaveFile { get; set; }
+        public static string ActiveSaveSlotName { get; private set; }
+        public static SaveGameFileInfo SaveFile { get; private set; }
 
         public static bool CanLoad => SaveFile != null && !SaveFile.IsCorrupted;
 
@@ -30,14 +30,14 @@ namespace BetterSaveLoad
         // Get the name of the currently loaded save file.
         [HarmonyPostfix]
         [HarmonyPatch("LoadSaveGameData")]
-        public static void Postfix1(string ___ActiveSaveSlotName) => ActiveSaveSlotName = ___ActiveSaveSlotName;
+        public static void Postfix1() => ActiveSaveSlotName = MBSaveLoad.ActiveSaveSlotName;
 
         [HarmonyPostfix]
         [HarmonyPatch("OnNewGame")]
-        public static void Postfix2(string ___ActiveSaveSlotName) => ActiveSaveSlotName = ___ActiveSaveSlotName;
+        public static void Postfix2() => ActiveSaveSlotName = MBSaveLoad.ActiveSaveSlotName;
 
         [HarmonyPatch("QuickSaveCurrentGame")]
-        public static void Prefix(ref string ___ActiveSaveSlotName)
+        public static void Prefix()
         {
             // Increment the quick save index.
             QuickSaveIndex++;
@@ -49,9 +49,9 @@ namespace BetterSaveLoad
             }
 
             // Replace the save file name with a custom one with the quick save index.
-            ___ActiveSaveSlotName = QuickSaveNamePrefix + PlayerClanAndMainHeroName + QuickSaveIndex;
+            AccessTools.Property(typeof(MBSaveLoad), "ActiveSaveSlotName").SetValue(null, QuickSaveNamePrefix + PlayerClanAndMainHeroName + QuickSaveIndex);
 
-            ActiveSaveSlotName = ___ActiveSaveSlotName;
+            ActiveSaveSlotName = MBSaveLoad.ActiveSaveSlotName;
 
             // Display the file name of the saved game in a debug message.
             InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=BSLmsg001}Game saved: \"{SAVENAME}\".").SetTextVariable("SAVENAME", ActiveSaveSlotName).ToString()));
