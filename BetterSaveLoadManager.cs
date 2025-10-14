@@ -25,7 +25,7 @@ namespace BetterSaveLoad
 
         public static bool CanLoad => SaveFile != null && !SaveFile.IsCorrupted;
 
-        public static string PlayerClanAndMainHeroName => Clan.PlayerClan.Name.ToString().ToLower() + "_" + Hero.MainHero.Name.ToString().ToLower() + "_";
+        public static string PlayerSaveNamePrefix => Clan.PlayerClan?.Name.ToString().ToLower() + "_" + Hero.MainHero.Name.ToString().ToLower() + "_";
 
         // Get the name of the currently loaded save file.
         [HarmonyPostfix]
@@ -49,7 +49,7 @@ namespace BetterSaveLoad
             }
 
             // Replace the save file name with a custom one with the quick save index.
-            AccessTools.Property(typeof(MBSaveLoad), "ActiveSaveSlotName").SetValue(null, QuickSaveNamePrefix + PlayerClanAndMainHeroName + QuickSaveIndex);
+            AccessTools.Property(typeof(MBSaveLoad), "ActiveSaveSlotName").SetValue(null, QuickSaveNamePrefix + PlayerSaveNamePrefix + QuickSaveIndex);
 
             ActiveSaveSlotName = MBSaveLoad.ActiveSaveSlotName;
 
@@ -59,7 +59,7 @@ namespace BetterSaveLoad
 
         public static void InitializeSaveIndexes()
         {
-            string quickSaveName = string.Empty, battleAutoSaveName = string.Empty, quickSaveNameWithoutIndex = QuickSaveNamePrefix + PlayerClanAndMainHeroName, battleAutoSaveNameWithoutIndex = BattleAutoSaveNamePrefix + PlayerClanAndMainHeroName;
+            string quickSaveName = string.Empty, battleAutoSaveName = string.Empty, quickSaveNameWithoutIndex = QuickSaveNamePrefix + PlayerSaveNamePrefix, battleAutoSaveNameWithoutIndex = BattleAutoSaveNamePrefix + PlayerSaveNamePrefix;
 
             quickSaveName = MBSaveLoad.GetSaveFiles().FirstOrDefault(saveFile => saveFile.Name.StartsWith(quickSaveNameWithoutIndex))?.Name;
             battleAutoSaveName = MBSaveLoad.GetSaveFiles().FirstOrDefault(saveFile => saveFile.Name.StartsWith(battleAutoSaveNameWithoutIndex))?.Name;
@@ -103,7 +103,7 @@ namespace BetterSaveLoad
                     BattleAutoSaveIndex = 1;
                 }
 
-                ActiveSaveSlotName = BattleAutoSaveNamePrefix + PlayerClanAndMainHeroName + BattleAutoSaveIndex;
+                ActiveSaveSlotName = BattleAutoSaveNamePrefix + PlayerSaveNamePrefix + BattleAutoSaveIndex;
 
                 Campaign.Current.SaveHandler.SaveAs(ActiveSaveSlotName);
                 // Display the file name of the saved game in a debug message.
