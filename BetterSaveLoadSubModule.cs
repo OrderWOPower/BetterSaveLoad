@@ -31,27 +31,9 @@ namespace BetterSaveLoad
             {
                 IInputContext input = MapScreen.Instance?.Input ?? Mission.Current?.InputManager;
 
-                if (input != null)
+                if (input != null && input.IsKeyPressed(InputKey.F9) && (ScreenManager.TopScreen is MapScreen || (input.IsControlDown() && ScreenManager.TopScreen is MissionScreen)))
                 {
-                    bool isMapScreen = ScreenManager.TopScreen is MapScreen, isMissionScreen = ScreenManager.TopScreen is MissionScreen;
-
-                    if (input.IsControlDown())
-                    {
-                        if (input.IsKeyPressed(InputKey.S) && isMapScreen)
-                        {
-                            Campaign.Current.SaveHandler.QuickSaveCurrentGame();
-                        }
-
-                        if (input.IsKeyPressed(InputKey.L) && (isMapScreen || isMissionScreen))
-                        {
-                            BetterSaveLoadManager.QuickLoadPreviousGame();
-                        }
-                    }
-
-                    if (input.IsKeyPressed(InputKey.F9) && isMapScreen)
-                    {
-                        BetterSaveLoadManager.QuickLoadPreviousGame();
-                    }
+                    BetterSaveLoadManager.QuickLoadPreviousGame();
                 }
             }
         }
