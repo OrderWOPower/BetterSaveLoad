@@ -25,6 +25,7 @@
   <string id="BSLoptv003" text="两者"/>
   <string id="BSLmsg001" text="游戏已保存：&quot;{SAVENAME}&quot;。"/>
   <string id="BSLmsg002" text="游戏已加载：&quot;{SAVENAME}&quot;。"/>
-  <string id="BSLmsg003" text="无加载的存档文件！"/>
+  <string id="BSLmsg003" text="错误：无加载的存档文件！"/>
+  <string id="BSLmsg004" text="警告：存档名称包含非法字符！正在移除非法字符。"/>
  </strings>
 </base>

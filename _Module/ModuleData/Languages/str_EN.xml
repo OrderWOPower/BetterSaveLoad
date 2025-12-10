@@ -25,6 +25,7 @@
   <string id="BSLoptv003" text="Both"/>
   <string id="BSLmsg001" text="Game saved: &quot;{SAVENAME}&quot;."/>
   <string id="BSLmsg002" text="Game loaded: &quot;{SAVENAME}&quot;."/>
-  <string id="BSLmsg003" text="No save files to load!"/>
+  <string id="BSLmsg003" text="Error: No save files to load!"/>
+  <string id="BSLmsg004" text="Warning: Save name contains illegal characters! Removing illegal characters."/>
  </strings>
 </base>

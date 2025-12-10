@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using SandBox;
+using System.IO;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.MapEvents;
@@ -39,6 +40,8 @@ namespace BetterSaveLoad
         [HarmonyPatch("QuickSaveCurrentGame")]
         public static void Prefix()
         {
+            string saveName = QuickSaveNamePrefix + PlayerSaveNamePrefix + QuickSaveIndex;
+
             // Increment the quick save index.
             QuickSaveIndex++;
 
@@ -48,8 +51,17 @@ namespace BetterSaveLoad
                 QuickSaveIndex = 1;
             }
 
+            if (saveName.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            {
+                // Remove illegal characters from the save name.
+                saveName = new string(saveName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)).ToArray());
+
+                // Display a warning message if the save name contains illegal characters.
+                InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=BSLmsg004}Warning: Save name contains illegal characters! Removing illegal characters.").ToString()));
+            }
+
             // Replace the save file name with a custom one with the quick save index.
-            AccessTools.Property(typeof(MBSaveLoad), "ActiveSaveSlotName").SetValue(null, QuickSaveNamePrefix + PlayerSaveNamePrefix + QuickSaveIndex);
+            AccessTools.Property(typeof(MBSaveLoad), "ActiveSaveSlotName").SetValue(null, saveName);
 
             ActiveSaveSlotName = MBSaveLoad.ActiveSaveSlotName;
 
@@ -94,6 +106,8 @@ namespace BetterSaveLoad
             // Execute only if the numbers of attackers and defenders are greater than or equal to the minimum numbers in the settings.
             if (Settings.ShouldAutoSaveForBattle && (shouldAutoSaveBeforeBattle || shouldAutoSaveAfterBattle))
             {
+                string saveName = BattleAutoSaveNamePrefix + PlayerSaveNamePrefix + BattleAutoSaveIndex;
+
                 // Increment the battle auto save index.
                 BattleAutoSaveIndex++;
 
@@ -103,7 +117,16 @@ namespace BetterSaveLoad
                     BattleAutoSaveIndex = 1;
                 }
 
-                ActiveSaveSlotName = BattleAutoSaveNamePrefix + PlayerSaveNamePrefix + BattleAutoSaveIndex;
+                if (saveName.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+                {
+                    // Remove illegal characters from the save name.
+                    saveName = new string(saveName.Where(c => !Path.GetInvalidFileNameChars().Contains(c)).ToArray());
+
+                    // Display a warning message if the save name contains illegal characters.
+                    InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=BSLmsg004}Warning: Save name contains illegal characters! Removing illegal characters.").ToString()));
+                }
+
+                ActiveSaveSlotName = saveName;
 
                 Campaign.Current.SaveHandler.SaveAs(ActiveSaveSlotName);
                 // Display the file name of the saved game in a debug message.
@@ -123,7 +146,8 @@ namespace BetterSaveLoad
                 return;
             }
 
-            InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=BSLmsg003}No save files to load!").ToString()));
+            // Display an error message if there are no save files to load.
+            InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=BSLmsg003}Error: No save files to load!").ToString()));
         }
 
         public static void StartGame(LoadResult loadResult)
